@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">kibun</string>
+    <string name="action_settings">Settings</string>
+    
+    <string name="hint_title">今日の出来事</string>
+    <string name="hint_content">今日の気分</string>
+    <string name="button_save">保存</string>
+    <string name="toast_saved">保存しました</string>
+    
+    <string name="add_diary_entry">日記をつける</string>
+    <string name="new_plan_title">日記をつける</string>
+    <string name="new_plan_hint">今日の出来事や気分を記録しましょう。</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="calendar_cell_stroke">1dp</dimen>
+    <dimen name="calendar_cell_stroke_selected">2dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+</resources>
