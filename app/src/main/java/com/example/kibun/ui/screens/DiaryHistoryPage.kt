@@ -37,27 +37,6 @@ fun DiaryHistoryPage(
     themeColor: Color,
     accentColor: Color
 ) {
-    val calendar = Calendar.getInstance()
-    val today = calendar.get(Calendar.DAY_OF_MONTH)
-    var selectedDay by remember { mutableStateOf<Int?>(today) }
-    var planText by remember { mutableStateOf("") }
-
-    // 選択された日が過去かどうかを判定
-    val isPastDate = selectedDay?.let { it < today } ?: false
-
-    // 選択された日の日記をフィルタリング
-    val selectedDateEntries = remember(selectedDay, entries) {
-        if (selectedDay == null) emptyList()
-        else {
-            entries.filter { entry ->
-                val entryCal = Calendar.getInstance().apply { timeInMillis = entry.date }
-                entryCal.get(Calendar.DAY_OF_MONTH) == selectedDay &&
-                entryCal.get(Calendar.MONTH) == calendar.get(Calendar.MONTH) &&
-                entryCal.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)
-            }
-        }
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -79,113 +58,28 @@ fun DiaryHistoryPage(
                 )
             }
 
-            // カレンダー
-            SmallCalendar(
-                themeColor = themeColor, 
-                entries = entries,
-                selectedDay = selectedDay,
-                onDaySelected = { selectedDay = it }
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // 選択された日付のタイトル
-            selectedDay?.let { day ->
-                Text(
-                    text = "${calendar.get(Calendar.MONTH) + 1}月${day}日の記録",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = themeColor.copy(alpha = 0.8f),
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
-
-                // リスト表示（予定と日記）
-                LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(bottom = 120.dp)
-                ) {
-                    // 予定セクション（現状はモック）
-                    item {
-                        SectionHeader("今日の予定", themeColor)
-                    }
-                    item {
-                        PlanMockItem(themeColor, accentColor)
-                    }
-
-                    // 日記セクション
-                    item {
-                        SectionHeader("日記", themeColor)
-                    }
-                    
-                    if (selectedDateEntries.isEmpty()) {
-                        item {
-                            Text(
-                                text = "この日の日記はありません",
-                                fontSize = 14.sp,
-                                color = themeColor.copy(alpha = 0.5f),
-                                modifier = Modifier.padding(vertical = 8.dp)
-                            )
-                        }
-                    } else {
-                        items(selectedDateEntries) { entry ->
-                            DiaryHistoryItem(entry, themeColor, accentColor)
-                        }
-                    }
-                }
-            }
-        }
-
-        // 入力欄（下部に固定。今日または未来の日付のみ表示）
-        AnimatedVisibility(
-            visible = selectedDay != null && !isPastDate,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 100.dp, start = 24.dp, end = 24.dp)
-        ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White.copy(alpha = 0.95f)
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            // リスト表示（全日記）
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(bottom = 120.dp)
             ) {
-                Row(
-                    modifier = Modifier.padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    OutlinedTextField(
-                        value = planText,
-                        onValueChange = { planText = it },
-                        placeholder = { Text("予定やメモを追加...", fontSize = 14.sp) },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(16.dp),
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = accentColor,
-                            unfocusedBorderColor = Color.Transparent,
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent
-                        ),
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onDone = {
-                                if (planText.isNotBlank()) {
-                                    planText = ""
-                                }
-                            }
+                item {
+                    SectionHeader("日記の履歴", themeColor)
+                }
+                
+                if (entries.isEmpty()) {
+                    item {
+                        Text(
+                            text = "日記はまだありません",
+                            fontSize = 14.sp,
+                            color = themeColor.copy(alpha = 0.5f),
+                            modifier = Modifier.padding(vertical = 8.dp)
                         )
-                    )
-                    IconButton(
-                        onClick = {
-                            planText = ""
-                        },
-                        enabled = planText.isNotBlank()
-                    ) {
-                        Icon(Icons.Default.Send, contentDescription = "保存", tint = accentColor)
+                    }
+                } else {
+                    items(entries) { entry ->
+                        DiaryHistoryItem(entry, themeColor, accentColor)
                     }
                 }
             }

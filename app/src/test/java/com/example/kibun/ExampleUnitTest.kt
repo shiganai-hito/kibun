@@ -1,4 +1,4 @@
-package com.example.kibun2
+package com.example.kibun
 
 import org.junit.Test
 

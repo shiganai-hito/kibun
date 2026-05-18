@@ -67,13 +67,9 @@ fun NightHomeScreen(
             Spacer(modifier = Modifier.height(24.dp))
             
             EveningReflectionSection(themeColor, accentColor)
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            SmallCalendar(themeColor = themeColor, entries = entries)
-            
+
             Spacer(modifier = Modifier.height(80.dp))
-        }
+            }
 
         Box(
             modifier = Modifier

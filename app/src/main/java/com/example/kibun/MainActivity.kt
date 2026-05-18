@@ -14,10 +14,7 @@ import com.example.kibun.ui.viewmodel.KibunViewModelFactory
 
 class MainActivity : ComponentActivity() {
     private val viewModel: KibunViewModel by viewModels {
-        val app = application as? KibunApplication
-        if (app == null) {
-            throw IllegalStateException("Application must be KibunApplication")
-        }
+        val app = application as KibunApplication
         KibunViewModelFactory(app.repository)
     }
 

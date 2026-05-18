@@ -67,13 +67,9 @@ fun MorningHomeScreen(
             Spacer(modifier = Modifier.height(24.dp))
             
             TodayPlanSection(themeColor, accentColor)
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            SmallCalendar(themeColor = themeColor, entries = entries)
-            
+
             Spacer(modifier = Modifier.height(80.dp))
-        }
+            }
 
         Box(
             modifier = Modifier
