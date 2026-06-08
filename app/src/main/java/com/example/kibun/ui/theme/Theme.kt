@@ -13,29 +13,29 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFF64B5F6),
-    secondary = Color(0xFF42A5F5),
-    tertiary = Color(0xFF90CAF9),
-    background = Color(0xFF0D47A1),
-    surface = Color(0xFF1565C0),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color.White,
-    onSurface = Color.White,
+    primary = Color(0xFFD4E2D4),
+    secondary = Color(0xFFFFD5CD),
+    tertiary = Color(0xFFFAE3D9),
+    background = Color(0xFF1A1C1E),
+    surface = Color(0xFF2D2F31),
+    onPrimary = Color(0xFF1A1C1E),
+    onSecondary = Color(0xFF1A1C1E),
+    onTertiary = Color(0xFF1A1C1E),
+    onBackground = Color(0xFFE2E2E2),
+    onSurface = Color(0xFFE2E2E2),
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF0288D1),
-    secondary = Color(0xFF0277BD),
-    tertiary = Color(0xFF42A5F5),
-    background = Color(0xFFE1F5FE),
+    primary = Color(0xFF8E9775), // オリーブ・セージ系
+    secondary = Color(0xFFE28E8E), // くすみピンク
+    tertiary = Color(0xFFEADBC8), // ベージュ
+    background = Color(0xFFF9F7F7), // オフホワイト
     surface = Color.White,
     onPrimary = Color.White,
     onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF0277BD),
-    onSurface = Color(0xFF0277BD),
+    onTertiary = Color(0xFF454545),
+    onBackground = Color(0xFF454545),
+    onSurface = Color(0xFF454545),
 )
 
 @Composable
@@ -60,7 +60,7 @@ fun KibunAppTheme(
             
             val window = (currentContext as? Activity)?.window
             if (window != null) {
-                window.statusBarColor = colorScheme.primary.toArgb()
+                window.statusBarColor = Color.Transparent.toArgb()
                 WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
             }
         }

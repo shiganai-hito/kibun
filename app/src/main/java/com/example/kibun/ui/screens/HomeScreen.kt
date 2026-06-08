@@ -26,27 +26,45 @@ import java.util.Calendar
 @Composable
 fun HomeScreen(
     viewModel: KibunViewModel,
-    onNavigateToDiary: () -> Unit
+    onNavigateToDiary: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     val entries by viewModel.allEntries.collectAsState()
+    val plans by viewModel.allPlans.collectAsState()
+    val themeOverride by viewModel.themeOverride.collectAsState()
+    
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     
-    val accentColor = Color(0xFFA8BDC9)
-    val (themeColor, timeOfDay) = when {
-        hour in 5..11 -> Color(0xFF546E7A) to TimeOfDay.MORNING
-        hour in 12..17 -> Color(0xFF455A64) to TimeOfDay.AFTERNOON
-        else -> Color(0xFFECEFF1) to TimeOfDay.NIGHT
+    val accentColor = Color(0xFFE28E8E) // 韓国風のくすみピンク
+    
+    val timeOfDay = when (themeOverride) {
+        "MORNING" -> TimeOfDay.MORNING
+        "AFTERNOON" -> TimeOfDay.AFTERNOON
+        "NIGHT" -> TimeOfDay.NIGHT
+        else -> {
+            when {
+                hour in 5..11 -> TimeOfDay.MORNING
+                hour in 12..17 -> TimeOfDay.AFTERNOON
+                else -> TimeOfDay.NIGHT
+            }
+        }
     }
 
-    val pagerState = rememberPagerState(pageCount = { 2 })
+    val themeColor = when (timeOfDay) {
+        TimeOfDay.MORNING -> Color(0xFF4A4A4A)
+        TimeOfDay.AFTERNOON -> Color(0xFF333333)
+        TimeOfDay.NIGHT -> Color(0xFFF0F0F0)
+    }
+
+    val pagerState = rememberPagerState(pageCount = { 3 })
     val scope = rememberCoroutineScope()
 
     Box(modifier = Modifier.fillMaxSize()) {
         // 背景の描画
         val backgroundModifier = when (timeOfDay) {
-            TimeOfDay.MORNING -> Modifier.background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(Color(0xFFE8F0F2), Color(0xFFCFDEE7))))
-            TimeOfDay.AFTERNOON -> Modifier.background(Color(0xFFFCFCFC))
-            TimeOfDay.NIGHT -> Modifier.background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(Color(0xFF102027), Color(0xFF263238))))
+            TimeOfDay.MORNING -> Modifier.background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(Color(0xFFFFF9F2), Color(0xFFFFEBD6))))
+            TimeOfDay.AFTERNOON -> Modifier.background(Color(0xFFFAF9F6))
+            TimeOfDay.NIGHT -> Modifier.background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(Color(0xFF1A1C1E), Color(0xFF2D2F31))))
         }
         
         Box(modifier = Modifier.fillMaxSize().then(backgroundModifier)) {
@@ -57,12 +75,32 @@ fun HomeScreen(
                 when (page) {
                     0 -> {
                         when (timeOfDay) {
-                            TimeOfDay.MORNING -> MorningHomeScreen(entries, onNavigateToDiary, onNavigateToView = { scope.launch { pagerState.animateScrollToPage(1) } })
-                            TimeOfDay.AFTERNOON -> AfternoonHomeScreen(entries, onNavigateToDiary, onNavigateToView = { scope.launch { pagerState.animateScrollToPage(1) } })
-                            TimeOfDay.NIGHT -> NightHomeScreen(entries, onNavigateToDiary, onNavigateToView = { scope.launch { pagerState.animateScrollToPage(1) } })
+                            TimeOfDay.MORNING -> MorningHomeScreen(entries, plans, onNavigateToDiary, onNavigateToView = { scope.launch { pagerState.animateScrollToPage(1) } }, onNavigateToSettings = onNavigateToSettings)
+                            TimeOfDay.AFTERNOON -> AfternoonHomeScreen(entries, plans, onNavigateToDiary, onNavigateToView = { scope.launch { pagerState.animateScrollToPage(1) } }, onNavigateToSettings = onNavigateToSettings)
+                            TimeOfDay.NIGHT -> NightHomeScreen(entries, plans, onNavigateToDiary, onNavigateToView = { scope.launch { pagerState.animateScrollToPage(1) } }, onNavigateToSettings = onNavigateToSettings)
                         }
                     }
-                    1 -> DiaryHistoryPage(entries, themeColor, accentColor)
+                    1 -> DiaryHistoryPage(
+                        entries = entries,
+                        plans = plans,
+                        themeColor = themeColor,
+                        accentColor = accentColor,
+                        onAddPlan = { title, date ->
+                            viewModel.insertPlan(
+                                com.example.kibun.data.KibunPlan(
+                                    title = title,
+                                    date = date
+                                )
+                            )
+                        },
+                        onToggleFavorite = { viewModel.toggleFavorite(it) }
+                    )
+                    2 -> FavoritePage(
+                        entries = entries,
+                        themeColor = themeColor,
+                        accentColor = accentColor,
+                        onToggleFavorite = { viewModel.toggleFavorite(it) }
+                    )
                 }
             }
         }
@@ -104,10 +142,10 @@ fun HomeScreen(
                     BottomNavItem(
                         icon = Icons.Default.Favorite,
                         label = "お気に入り",
-                        selected = false,
+                        selected = pagerState.currentPage == 2,
                         themeColor = themeColor,
                         accentColor = accentColor,
-                        onClick = { }
+                        onClick = { scope.launch { pagerState.animateScrollToPage(2) } }
                     )
                 }
             }

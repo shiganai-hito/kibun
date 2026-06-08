@@ -11,5 +11,16 @@ data class KibunEntry(
     val content: String,
     val date: Long,
     val mood: String = "",
-    val imageUri: String? = null
+    val category: String = "日常",
+    val imageUri: String? = null,
+    val isFavorite: Boolean = false
+)
+
+@Entity(tableName = "kibun_plans")
+data class KibunPlan(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val title: String,
+    val date: Long,
+    val time: String = ""
 )

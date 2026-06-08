@@ -8,7 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,50 +19,77 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.rememberCoroutineScope
 import com.example.kibun.data.KibunEntry
+import com.example.kibun.data.KibunPlan
+import com.example.kibun.ui.components.SmallCalendar
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
 fun AfternoonHomeScreen(
     entries: List<KibunEntry>,
+    plans: List<KibunPlan>,
     onNavigateToDiary: () -> Unit,
-    onNavigateToView: () -> Unit
+    onNavigateToView: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
-    val accentColor = Color(0xFFA8BDC9) // 共通の差し色：くすんだ水色
-    val themeColor = Color(0xFF455A64) // テキスト用：チャコールグレー
+    val accentColor = Color(0xFF8E9775) // 韓国風のセージグリーン
+    val themeColor = Color(0xFF333333) // 深いチャコール
+
+    var currentTime by remember { mutableStateOf(Calendar.getInstance()) }
+    
+    LaunchedEffect(Unit) {
+        while(true) {
+            currentTime = Calendar.getInstance()
+            kotlinx.coroutines.delay(1000)
+        }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFCFCFC)) // 真っ白に近い背景
+            .background(Color(0xFFFAF9F6)) // アラバスター（非常に淡いベージュ白）
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 28.dp)
         ) {
-            Spacer(modifier = Modifier.height(56.dp))
+            Spacer(modifier = Modifier.height(64.dp))
             
-            AfternoonHeader(themeColor)
+            AfternoonHeader(currentTime, themeColor, onNavigateToSettings)
             
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(40.dp))
             
             AfternoonDateCard(themeColor, accentColor)
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
             
             AfternoonQuickActions(onNavigateToDiary, onNavigateToView, themeColor, accentColor)
             
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            AfternoonActivitiesSection(themeColor, accentColor)
+            Spacer(modifier = Modifier.height(32.dp))
 
-            Spacer(modifier = Modifier.height(80.dp))
-            }
+            Text(
+                text = "カレンダー",
+                fontSize = 17.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = themeColor.copy(alpha = 0.7f),
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            SmallCalendar(
+                entries = entries, 
+                plans = plans, 
+                themeColor = themeColor, 
+                accentColor = accentColor,
+                modifier = Modifier.clip(RoundedCornerShape(28.dp))
+            )
+
+            Spacer(modifier = Modifier.height(100.dp))
+        }
 
         Box(
             modifier = Modifier
@@ -79,27 +106,30 @@ fun AfternoonHomeScreen(
 }
 
 @Composable
-private fun AfternoonHeader(themeColor: Color) {
+private fun AfternoonHeader(currentTime: Calendar, themeColor: Color, onNavigateToSettings: () -> Unit) {
+    val timeFormat = SimpleDateFormat("HH:mm", Locale.JAPAN)
+    val timeStr = timeFormat.format(currentTime.time)
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Bottom
     ) {
-        Column {
-            Text(
-                text = "こんにちは",
-                fontSize = 26.sp,
-                fontWeight = FontWeight.Bold,
-                color = themeColor
-            )
-            Text(
-                text = "午後も頑張りましょう",
-                fontSize = 15.sp,
-                color = themeColor.copy(alpha = 0.5f)
-            )
-        }
+        Text(
+            text = timeStr,
+            fontSize = 72.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = themeColor,
+            letterSpacing = (-3).sp,
+            modifier = Modifier.offset(y = 12.dp)
+        )
         
-        IconButton(onClick = { /* Settings */ }) {
+        IconButton(
+            onClick = onNavigateToSettings,
+            modifier = Modifier
+                .padding(bottom = 12.dp)
+                .background(Color.White, CircleShape)
+        ) {
             Icon(
                 imageVector = Icons.Default.Settings,
                 contentDescription = "Settings",
@@ -113,7 +143,7 @@ private fun AfternoonHeader(themeColor: Color) {
 private fun AfternoonDateCard(themeColor: Color, accentColor: Color) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
@@ -122,30 +152,37 @@ private fun AfternoonDateCard(themeColor: Color, accentColor: Color) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(24.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
                 Text(
                     text = "3月26日",
-                    fontSize = 22.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = themeColor
                 )
                 Text(
                     text = "木曜日 午後",
-                    fontSize = 13.sp,
-                    color = themeColor.copy(alpha = 0.4f)
+                    fontSize = 14.sp,
+                    color = themeColor.copy(alpha = 0.4f),
+                    fontWeight = FontWeight.Medium
                 )
             }
             
-            Icon(
-                imageVector = Icons.Default.WbSunny,
-                contentDescription = "Sunny",
-                modifier = Modifier.size(40.dp),
-                tint = accentColor.copy(alpha = 0.8f)
-            )
+            Surface(
+                modifier = Modifier.size(48.dp),
+                shape = CircleShape,
+                color = accentColor.copy(alpha = 0.1f)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.WbSunny,
+                    contentDescription = "Sunny",
+                    modifier = Modifier.padding(10.dp),
+                    tint = accentColor.copy(alpha = 0.8f)
+                )
+            }
         }
     }
 }
@@ -155,20 +192,20 @@ private fun AfternoonQuickActions(onNavigateToDiary: () -> Unit, onNavigateToVie
     Column {
         Text(
             text = "クイックアクション",
-            fontSize = 16.sp,
+            fontSize = 17.sp,
             fontWeight = FontWeight.SemiBold,
             color = themeColor.copy(alpha = 0.7f),
-            modifier = Modifier.padding(bottom = 12.dp)
+            modifier = Modifier.padding(bottom = 16.dp)
         )
         
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             AfternoonActionCard(
                 icon = Icons.Default.Edit,
                 label = "日記を書く",
-                color = accentColor.copy(alpha = 0.15f),
+                color = accentColor.copy(alpha = 0.1f),
                 themeColor = themeColor,
                 modifier = Modifier.weight(1f),
                 onClick = onNavigateToDiary
@@ -176,7 +213,7 @@ private fun AfternoonQuickActions(onNavigateToDiary: () -> Unit, onNavigateToVie
             AfternoonActionCard(
                 icon = Icons.Default.Add,
                 label = "予定を入れる",
-                color = Color(0xFFF5F5F5),
+                color = Color.White,
                 themeColor = themeColor,
                 modifier = Modifier.weight(1f),
                 onClick = onNavigateToView
@@ -196,31 +233,32 @@ private fun AfternoonActionCard(
 ) {
     Card(
         modifier = modifier
-            .height(90.dp)
+            .height(110.dp)
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = color
-        )
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(12.dp),
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                modifier = Modifier.size(28.dp),
+                modifier = Modifier.size(32.dp),
                 tint = themeColor.copy(alpha = 0.6f)
             )
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = label,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
                 color = themeColor.copy(alpha = 0.7f)
             )
         }
@@ -228,84 +266,19 @@ private fun AfternoonActionCard(
 }
 
 @Composable
-private fun AfternoonActivitiesSection(themeColor: Color, accentColor: Color) {
-    Column {
-        Text(
-            text = "今日の活動",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = themeColor.copy(alpha = 0.7f),
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-        
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                ActivityItem(Icons.Default.CheckCircle, "朝のミーティング完了", "09:30", themeColor, accentColor)
-                ActivityItem(Icons.Default.WbSunny, "ランチタイム", "12:00", themeColor, accentColor)
-                ActivityItem(Icons.Default.Schedule, "プロジェクトレビュー", "14:00", themeColor, accentColor)
-            }
-        }
-    }
-}
-
-@Composable
-private fun ActivityItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    time: String,
-    themeColor: Color,
-    accentColor: Color
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(22.dp),
-            tint = accentColor.copy(alpha = 0.5f)
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Medium,
-                color = themeColor
-            )
-        }
-        Text(
-            text = time,
-            fontSize = 11.sp,
-            color = themeColor.copy(alpha = 0.4f)
-        )
-    }
-}
-
-@Composable
 private fun AfternoonBottomNav(themeColor: Color, accentColor: Color, onViewClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp),
+                .padding(vertical = 8.dp, horizontal = 12.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             AfternoonNavItem(Icons.Default.Home, "ホーム", true, themeColor, accentColor) { }

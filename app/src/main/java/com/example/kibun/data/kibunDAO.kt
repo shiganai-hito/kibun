@@ -31,4 +31,24 @@ interface KibunDao {
             "ORDER BY date ASC"
     )
     fun getEntriesForRange(start: Long, end: Long): Flow<List<KibunEntry>>
+
+    // Plans
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPlan(plan: KibunPlan)
+
+    @Update
+    suspend fun updatePlan(plan: KibunPlan)
+
+    @Delete
+    suspend fun deletePlan(plan: KibunPlan)
+
+    @Query("SELECT * FROM kibun_plans ORDER BY date ASC")
+    fun getAllPlans(): Flow<List<KibunPlan>>
+
+    @Query(
+        "SELECT * FROM kibun_plans " +
+            "WHERE date >= :start AND date < :end " +
+            "ORDER BY date ASC"
+    )
+    fun getPlansForRange(start: Long, end: Long): Flow<List<KibunPlan>>
 }

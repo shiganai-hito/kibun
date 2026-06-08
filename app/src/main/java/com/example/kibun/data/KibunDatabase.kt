@@ -6,8 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [KibunEntry::class],
-    version = 2,
+    entities = [KibunEntry::class, KibunPlan::class],
+    version = 5,
     exportSchema = false
 )
 abstract class KibunDatabase : RoomDatabase() {
