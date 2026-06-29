@@ -36,9 +36,12 @@ android {
         jvmTarget = "17"
     }
     buildFeatures {
-        viewBinding = true
         compose = true
     }
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -46,9 +49,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))
@@ -66,8 +66,11 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     // Room
-    val room_version = "2.6.1"
-    implementation("androidx.room:room-runtime:$room_version")
-    ksp("androidx.room:room-compiler:$room_version")
-    implementation("androidx.room:room-ktx:$room_version")
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
 }
+

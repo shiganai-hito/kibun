@@ -15,7 +15,7 @@ import com.example.kibun.ui.viewmodel.KibunViewModelFactory
 class MainActivity : ComponentActivity() {
     private val viewModel: KibunViewModel by viewModels {
         val app = application as KibunApplication
-        KibunViewModelFactory(app.repository)
+        KibunViewModelFactory(app.repository, app.themePreferences)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,3 +32,4 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+

@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface KibunDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(entry: KibunEntry)
 
     @Update
@@ -33,7 +33,7 @@ interface KibunDao {
     fun getEntriesForRange(start: Long, end: Long): Flow<List<KibunEntry>>
 
     // Plans
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertPlan(plan: KibunPlan)
 
     @Update

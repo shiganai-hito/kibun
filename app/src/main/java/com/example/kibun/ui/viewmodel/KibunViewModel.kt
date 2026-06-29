@@ -1,25 +1,42 @@
 package com.example.kibun.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.kibun.data.KibunEntry
 import com.example.kibun.data.KibunPlan
 import com.example.kibun.data.KibunRepository
+import com.example.kibun.data.ThemePreferences
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
-class KibunViewModel(private val repository: KibunRepository) : ViewModel() {
+class KibunViewModel(
+    private val repository: KibunRepository,
+    private val themePreferences: ThemePreferences
+) : ViewModel() {
 
-    private val _themeOverride = MutableStateFlow<String?>(null)
-    val themeOverride = _themeOverride.asStateFlow()
+    companion object {
+        private const val TAG = "KibunViewModel"
+    }
+
+    // テーマ設定（DataStoreで永続化）
+    val themeOverride: StateFlow<String?> = themePreferences.themeOverride.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = null
+    )
 
     fun setThemeOverride(theme: String?) {
-        _themeOverride.value = theme
+        viewModelScope.launch {
+            try {
+                themePreferences.setThemeOverride(theme)
+            } catch (e: Exception) {
+                Log.e(TAG, "テーマ設定の保存に失敗しました", e)
+            }
+        }
     }
 
     // すべてのエントリをStateFlowとして提供
@@ -37,42 +54,74 @@ class KibunViewModel(private val repository: KibunRepository) : ViewModel() {
     )
 
     fun insert(entry: KibunEntry) = viewModelScope.launch {
-        repository.insert(entry)
+        try {
+            repository.insert(entry)
+        } catch (e: Exception) {
+            Log.e(TAG, "日記の保存に失敗しました", e)
+        }
     }
 
     fun update(entry: KibunEntry) = viewModelScope.launch {
-        repository.update(entry)
+        try {
+            repository.update(entry)
+        } catch (e: Exception) {
+            Log.e(TAG, "日記の更新に失敗しました", e)
+        }
     }
 
     fun delete(entry: KibunEntry) = viewModelScope.launch {
-        repository.delete(entry)
+        try {
+            repository.delete(entry)
+        } catch (e: Exception) {
+            Log.e(TAG, "日記の削除に失敗しました", e)
+        }
     }
 
     fun toggleFavorite(entry: KibunEntry) = viewModelScope.launch {
-        val updatedEntry = entry.copy(isFavorite = !entry.isFavorite)
-        repository.update(updatedEntry)
+        try {
+            val updatedEntry = entry.copy(isFavorite = !entry.isFavorite)
+            repository.update(updatedEntry)
+        } catch (e: Exception) {
+            Log.e(TAG, "お気に入りの切り替えに失敗しました", e)
+        }
     }
 
     // Plans
     fun insertPlan(plan: KibunPlan) = viewModelScope.launch {
-        repository.insertPlan(plan)
+        try {
+            repository.insertPlan(plan)
+        } catch (e: Exception) {
+            Log.e(TAG, "予定の保存に失敗しました", e)
+        }
     }
 
     fun updatePlan(plan: KibunPlan) = viewModelScope.launch {
-        repository.updatePlan(plan)
+        try {
+            repository.updatePlan(plan)
+        } catch (e: Exception) {
+            Log.e(TAG, "予定の更新に失敗しました", e)
+        }
     }
 
     fun deletePlan(plan: KibunPlan) = viewModelScope.launch {
-        repository.deletePlan(plan)
+        try {
+            repository.deletePlan(plan)
+        } catch (e: Exception) {
+            Log.e(TAG, "予定の削除に失敗しました", e)
+        }
     }
 }
 
-class KibunViewModelFactory(private val repository: KibunRepository) : ViewModelProvider.Factory {
+class KibunViewModelFactory(
+    private val repository: KibunRepository,
+    private val themePreferences: ThemePreferences
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(KibunViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return KibunViewModel(repository) as T
+            return KibunViewModel(repository, themePreferences) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
+

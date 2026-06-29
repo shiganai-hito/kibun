@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase
 @Database(
     entities = [KibunEntry::class, KibunPlan::class],
     version = 5,
-    exportSchema = false
+    exportSchema = true
 )
 abstract class KibunDatabase : RoomDatabase() {
     abstract fun kibunDao(): KibunDao
@@ -23,8 +23,12 @@ abstract class KibunDatabase : RoomDatabase() {
                     context.applicationContext,
                     KibunDatabase::class.java,
                     "kibun.db"
-                ).fallbackToDestructiveMigration().build().also { INSTANCE = it }
+                )
+                    .fallbackToDestructiveMigrationFrom(1, 2, 3, 4)
+                    .build()
+                    .also { INSTANCE = it }
             }
         }
     }
 }
+

@@ -2,6 +2,7 @@ package com.example.kibun.ui.screens
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -55,10 +56,14 @@ fun DiaryEntryScreen(
         onResult = { uri -> 
             if (uri != null) {
                 // Android 12などで後から写真を表示するために、永続的なアクセス権を取得する
-                context.contentResolver.takePersistableUriPermission(
-                    uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
+                try {
+                    context.contentResolver.takePersistableUriPermission(
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                } catch (e: SecurityException) {
+                    Log.w("DiaryEntryScreen", "永続的なURIパーミッションの取得に失敗しました", e)
+                }
                 selectedImageUri = uri 
             }
         }
@@ -68,11 +73,17 @@ fun DiaryEntryScreen(
     val categories = listOf("日常", "旅行", "記念日", "仕事", "趣味", "グルメ", "その他")
     val accentColor = Color(0xFFE28E8E) // 韓国風のくすみピンク
     
+    val themeOverride by viewModel.themeOverride.collectAsState()
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-    val (themeBrush, themeColor) = when {
-        hour in 5..11 -> Brush.verticalGradient(listOf(Color(0xFFFFF9F2), Color(0xFFFFEBD6))) to Color(0xFF4A4A4A)
-        hour in 12..17 -> Brush.verticalGradient(listOf(Color(0xFFFAF9F6), Color(0xFFFAF9F6))) to Color(0xFF333333)
-        else -> Brush.verticalGradient(listOf(Color(0xFF1A1C1E), Color(0xFF2D2F31))) to Color(0xFFF0F0F0)
+    val (themeBrush, themeColor) = when (themeOverride) {
+        "MORNING" -> Brush.verticalGradient(listOf(Color(0xFFFFF9F2), Color(0xFFFFEBD6))) to Color(0xFF4A4A4A)
+        "AFTERNOON" -> Brush.verticalGradient(listOf(Color(0xFFFAF9F6), Color(0xFFFAF9F6))) to Color(0xFF333333)
+        "NIGHT" -> Brush.verticalGradient(listOf(Color(0xFF1A1C1E), Color(0xFF2D2F31))) to Color(0xFFF0F0F0)
+        else -> when {
+            hour in 5..11 -> Brush.verticalGradient(listOf(Color(0xFFFFF9F2), Color(0xFFFFEBD6))) to Color(0xFF4A4A4A)
+            hour in 12..17 -> Brush.verticalGradient(listOf(Color(0xFFFAF9F6), Color(0xFFFAF9F6))) to Color(0xFF333333)
+            else -> Brush.verticalGradient(listOf(Color(0xFF1A1C1E), Color(0xFF2D2F31))) to Color(0xFFF0F0F0)
+        }
     }
 
     Scaffold(

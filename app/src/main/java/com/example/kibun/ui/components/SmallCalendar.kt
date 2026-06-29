@@ -116,7 +116,7 @@ fun SmallCalendar(
                 Row(modifier = Modifier.fillMaxWidth()) {
                     for (col in 0 until 7) {
                         val cellIndex = row * 7 + col
-                        val dayOfMonth = cellIndex - (firstDayOfWeek - 2)
+                        val dayOfMonth = cellIndex - (firstDayOfWeek - 1) + 1
                         
                         Box(
                             modifier = Modifier
